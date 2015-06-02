@@ -291,26 +291,29 @@ exports.optimize = function (options) {
     }
     
     function mutateSolution(solution) {
-        // Random change
-        var changeIndex;
-        var ol = options.items.length;
-        var sl = solution.items.length;
-        if(ol == sl || Math.random() < 0.5) {
-            // Add
-            // Automatically adds if there is one occurence of each item (solution.items.length == options.items.length)
-            var itemId = Math.round(Math.random()*(ol-1));
-            solution.items.push(new packing.Item(options.items[itemId]));
-            solution.itemCount[itemId] ++;
-        } else {
-            // Remove
-            var item;
-            do {
-                // Randomly select one occurence
-                changeIndex = Math.round(Math.random()*(sl-1));
-                item = solution.items[changeIndex];
-            } while(solution.itemCount[item.constraint.id] <= 1); // Retry if there is only one occurence of the item
-            solution.items.splice(changeIndex, 1);
-            solution.itemCount[item.constraint.id] --;
+        var changes = Math.round(Math.random() * 4 + 1);
+        for(var m = 0; m < changes; m++) {
+            // Random change
+            var changeIndex;
+            var ol = options.items.length;
+            var sl = solution.items.length;
+            if(ol == sl || Math.random() < 0.5) {
+                // Add
+                // Automatically adds if there is one occurence of each item (solution.items.length == options.items.length)
+                var itemId = Math.round(Math.random()*(ol-1));
+                solution.items.push(new packing.Item(options.items[itemId]));
+                solution.itemCount[itemId] ++;
+            } else {
+                // Remove
+                var item;
+                do {
+                    // Randomly select one occurence
+                    changeIndex = Math.round(Math.random()*(sl-1));
+                    item = solution.items[changeIndex];
+                } while(solution.itemCount[item.constraint.id] <= 1); // Retry if there is only one occurence of the item
+                solution.items.splice(changeIndex, 1);
+                solution.itemCount[item.constraint.id] --;
+            }
         }
     }
     

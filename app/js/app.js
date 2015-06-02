@@ -132,6 +132,8 @@
         
         options = optimization.readOptionsFromFile('../../data/data_20Lalpha.txt');
         
+        options.genetic.population = 1000;
+        
         var choice = optimization.optimize(options);
         
         console.log(choice);
