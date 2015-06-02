@@ -23,7 +23,8 @@ var exampleOptions = {
         population: 1000,
         generations: 100,
         selection: 0.5,
-        mutation: 0.2
+        mutation: 0.2,
+        mutationCount: 4
     }
 };
 
@@ -182,48 +183,65 @@ exports.optimize = function (options) {
     
     function geneticSelection(population, gen) {
         var selectedPopulation = [];
-        
+
         var l = population.length * options.genetic.selection;
-        var totalCost = 0, maxCost = 0;
-        var solution;
-        
-        // Total cost
-        for(var i in population) {
-            solution = population[i];
-            if(solution.cost > maxCost) {
-                maxCost = solution.cost;
+        if(options.genetic.randomSelection) {
+            var totalCost = 0, maxCost = 0;
+            var solution;
+
+            // Total cost
+            for(var i in population) {
+                solution = population[i];
+                if(solution.cost > maxCost) {
+                    maxCost = solution.cost;
+                }
             }
-        }
-        for(i in population) {
-            solution = population[i];
-            totalCost += maxCost - solution.cost + 1;
-        }
-        
-        // Selection based on the wheel of fortune concept
-        // Each solution has a slice which size is proportionnal to the solution cost
-        var die, cost;
-        for(var d = 0; d < l; d++) {
-            // Random cost
-            die = Math.random() * totalCost;
-            cost = 0;
-            // Cost added for each non-selected solution
             for(i in population) {
                 solution = population[i];
-                // Only non-selected solutions
-                if(solution.selection != gen) {
-                    cost += maxCost - solution.cost + 1;
-                    // If we go past the die, we select the solution
-                    if(cost >= die) {
-                        selectedPopulation.push(solution);
-                        solution.selection = gen;
-                        totalCost -= solution.cost;
-                        break;
+                totalCost += maxCost - solution.cost + 1;
+            }
+
+            // Selection based on the wheel of fortune concept
+            // Each solution has a slice which size is proportionnal to the solution cost
+            var die, cost;
+            for(var d = 0; d < l; d++) {
+                // Random cost
+                die = Math.random() * totalCost;
+                cost = 0;
+                // Cost added for each non-selected solution
+                for(i in population) {
+                    solution = population[i];
+                    // Only non-selected solutions
+                    if(solution.selection != gen) {
+                        cost += maxCost - solution.cost + 1;
+                        // If we go past the die, we select the solution
+                        if(cost >= die) {
+                            selectedPopulation.push(solution);
+                            solution.selection = gen;
+                            totalCost -= solution.cost;
+                            break;
+                        }
                     }
                 }
+            }
+        } else {
+            var sortedPopulation = population.sort(sortSolutions);
+            for(var i = 0; i < l; i++) {
+                selectedPopulation.push(sortedPopulation[i]);
             }
         }
         
         return selectedPopulation;
+    }
+    
+    function sortSolutions(solution1, solution2) {
+        if(solution1.cost < solution2.cost) {
+            return -1;
+        } else if(solution1.cost == solution2.cost) {
+            return 0;
+        } else {
+            return 1;
+        }
     }
     
     function geneticCrossOver(population) {
@@ -278,13 +296,16 @@ exports.optimize = function (options) {
     }
     
     function geneticMutation(population) {
-        var solution;
+        var solution, mutationCount;
         for(var i in population) {
             solution = population[i];
             
             // Mutation chance
             if(Math.random() <= options.genetic.mutation) {
-                mutateSolution(solution);
+                mutationCount = Math.round(Math.random()*(options.genetic.mutationCount-1))+1;
+                for(var m = 0; m < mutationCount; m++) {
+                    mutateSolution(solution);
+                }
                 updateSolution(solution);
             }
         }
@@ -335,13 +356,17 @@ exports.optimize = function (options) {
         // Mutation
         geneticMutation(population);
         
-        var min = 999999999, cost;
+        var min = 999999999, max = 0, cost, total = 0;
         for(var i in population) {
             if((cost = population[i].cost) < min) {
                 min = cost;
             }
+            if(cost > max) {
+                max = cost;
+            }
+            total += cost;
         }
-        console.log('best ' + min);
+        console.log('best ' + min +  ' mean ' + Math.round(total/population.length) +  ' worst ' + max);
     }
     
     // Best solution
@@ -371,7 +396,8 @@ exports.readOptionsFromFile = function(path) {
             population: 100,
             generations: 100,
             selection: 0.5,
-            mutation: 0.2
+            mutation: 0.2,
+            mutationCount: 5
         }
     };
     
