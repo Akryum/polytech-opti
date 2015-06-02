@@ -130,6 +130,8 @@
             }
         };
         
+        options = optimization.readOptionsFromFile('../../data/data_20Lalpha.txt');
+        
         var choice = optimization.optimize(options);
         
         console.log(choice);

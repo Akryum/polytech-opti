@@ -1,5 +1,6 @@
 'use strict';
 
+var fs = require("fs");
 var packing = require('./packing.js');
 var lpsolve = require('lp_solve');
 
@@ -198,8 +199,6 @@ exports.optimize = function (options) {
             totalCost += maxCost - solution.cost + 1;
         }
         
-        console.log("Max cost:" + maxCost);
-        
         // Selection based on the wheel of fortune concept
         // Each solution has a slice which size is proportionnal to the solution cost
         var die, cost;
@@ -325,6 +324,8 @@ exports.optimize = function (options) {
     
     // Generations
     for(var gen = 0; gen < options.genetic.generations; gen ++) {
+        console.log('gen' + gen);
+        
         // Selection
         population = geneticSelection(population, gen);
         
@@ -333,6 +334,14 @@ exports.optimize = function (options) {
         
         // Mutation
         geneticMutation(population);
+        
+        var min = 999999999, cost;
+        for(var i in population) {
+            if((cost = population[i].cost) < min) {
+                min = cost;
+            }
+        }
+        console.log('best ' + min);
     }
     
     // Best solution
@@ -348,5 +357,50 @@ exports.optimize = function (options) {
 };
 
 exports.readOptionsFromFile = function(path) {
-    var content = "";
+    var options = {
+        pattern: {
+            width: 100,
+            height: 40,
+            max: 999,
+            cost: 20,
+            copyCost: 1
+        },
+        items: [
+        ],
+        genetic: {
+            population: 100,
+            generations: 100,
+            selection: 0.5,
+            mutation: 0.2
+        }
+    };
+    
+    var content = fs.readFileSync(path, "utf8");
+    console.log(content);
+    var lines = content.split("\n");
+    
+    var reg, matches;
+    
+    reg = /LX=(\d+)/gi;
+    matches = reg.exec(lines[0]);
+    options.pattern.width = parseInt(matches[1]);
+    reg = /LY=(\d+)/gi;
+    matches = reg.exec(lines[1]);
+    options.pattern.height = parseInt(matches[1]);
+    
+    reg = /m=(\d+)/gi;
+    matches = reg.exec(lines[2]);
+    var l = parseInt(matches[1]);
+    
+    for(var i = 3; i < l + 3; i++) {
+        reg = /([\d.]+)\s+([\d.]+)\s+(\d+)/gi;
+        matches = reg.exec(lines[i]);
+        options.items.push({
+            width: parseFloat(matches[1]),
+            height: parseFloat(matches[2]),
+            min: parseFloat(matches[3])
+        });
+    }
+    
+    return options;
 };
