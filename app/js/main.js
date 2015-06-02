@@ -65,27 +65,3 @@
 
 
 
-(function() {
-    
-    var packing = require('./js/packing.js');
-    var Item = packing.Item;
-
-    var items = [
-        new Item(10, 20),
-        new Item(30, 10),
-        new Item(42, 25),
-        new Item(15, 15)
-    ];
-    
-    var options = {
-        pattern: {
-            width: 100,
-            height: 40,
-            min: 0,
-            max: 10
-        }
-    };
-    
-    packing.pack(items, options);
-    
-})();
