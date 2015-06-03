@@ -84,7 +84,8 @@
             progress: {
                 current: 0,
                 total: 0,
-                notification: null
+                notification: null,
+                inProgress: false
             }
         };
         
@@ -111,9 +112,15 @@
 
             srv.progress.current = 1;
             srv.progress.total = options.generations;
+            srv.progress.notification = null;
 
-            SocketService.socket.emit('optimize', options);
+            SocketService.socket.emit('optimize', options, function(launched) {
+                $timeout(function(){
+                    srv.progress.inProgress = launched;
+                });
+            });
             SocketService.socket.on('result', function(result) {
+                srv.progress.inProgress = false;
                 SocketService.socket.off('result');
                 deferred.resolve(result);
                 console.log(result);

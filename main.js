@@ -3,6 +3,8 @@ var config = require('./config.js');
 var optimization = require("./optimization.js");
 // Files
 var fs = require('fs');
+// Child process
+var cp = require('child_process');
 // Socket
 var io = require('socket.io')(config.socketConfig.port);
 // Web
@@ -15,6 +17,7 @@ io.on('connection', function (socket) {
     socket.on('getFiles', function(callback) {
         try {
             fs.readdir('./data', function(err, files) {
+                console.log('files:' + files);
                 if(!err) {
                     callback(files);
                 }
@@ -24,12 +27,12 @@ io.on('connection', function (socket) {
         }
     });
     
-    socket.on('optimize', function (options) {
+    socket.on('optimize', function (options, callback) {
         console.log(options);
         
         try {
-        
-            var opts = optimization.readOptionsFromFile('./data/' + options.file);
+            
+            /*var opts = optimization.readOptionsFromFile('./data/' + options.file);
 
             opts.genetic.population = parseInt(options.population);
             opts.genetic.generations = parseInt(options.generations);
@@ -88,10 +91,26 @@ io.on('connection', function (socket) {
             }, function(notification) {
                 console.log(notification);
                 socket.emit('progress', notification);
+            });*/
+            
+            var n = cp.fork(__dirname + '/process.js');
+            
+            n.on('message', function(m) {
+                if(m.result) {
+                    socket.emit('result', m.result);
+                } else if(m.notification) {
+                    socket.emit('progress', m.notification);
+                }
             });
             
+            n.send(options);
+            
+            callback(true);
+            
         } catch(e) {
-            console.error(e);
+            console.error(e.name + ':' + e.message + '\n' + e.stack);
+            
+            callback(false);
         }
     });
 
@@ -103,4 +122,4 @@ io.on('connection', function (socket) {
 
 // Web server
 Web.start();
-open('http://localhost:' + config.webConfig.port);
+//open('http://localhost:' + config.webConfig.port);

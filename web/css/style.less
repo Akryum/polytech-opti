@@ -26,11 +26,17 @@ button {
     background: #ef6464;
     color: white;
     font-weight: bold;
+    z-index: 10;
 }
 
 .settings {
     padding: 12px;
     background: #f8f8f8;
+    
+    &.disabled {
+        pointer-events: none;
+        opacity: 0.8;
+    }
     
     label {
         display: block;
@@ -65,6 +71,10 @@ button {
 
 .processing {
     padding: 12px;
+    
+    .details {
+        color: #888;
+    }
     
     .progress-bar {
         background: #eee;

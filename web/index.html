@@ -23,7 +23,7 @@
         
         <div class="disconnected" ng-hide="Opti.netStatus.connected">Déconnecté</div>
         
-        <section class="settings">
+        <section class="settings" ng-class="{disabled:!Opti.netStatus.connected || Opti.progress.inProgress}">
             
             <div class="h-box">
                 <div class="pane">
@@ -48,9 +48,9 @@
             
         </section>
         
-        <section class="processing">
+        <section class="processing" ng-show="Opti.progress.inProgress">
             
-            <div class="progress">Génération {{Opti.progress.current}} / {{Opti.progress.total}}</div>
+            <div class="progress">Génération {{Opti.progress.current}} / {{Opti.progress.total}} <span class="details" ng-show="Opti.progress.notification">(Min: {{Opti.progress.notification.min}} Moy: {{Opti.progress.notification.mean}} Max: {{Opti.progress.notification.max}})</span></div>
             
             <div class="progress-bar">
                 <div class="bar" ng-style="{width:Opti.progress.current/Opti.progress.total*100+'%'}"></div>

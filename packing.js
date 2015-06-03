@@ -124,6 +124,7 @@ function getFittingBin(item, bins){
     for(i in bins) {
         testFit = bins[i].testFit(item);
         if(testFit > 0){ 
+            item.rotated = false;
             return bins[i];
         } else if(testFit < 0) {
             item.rotated = true;
