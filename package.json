@@ -1,9 +1,0 @@
-{
-    "name": "proj-bin-packing",
-    "main": "app/index.html",
-    "description": "Projet optimisation discrète - Bin Packing",
-    "version": "0.1.0",
-    "window": {
-        "title": "Projet optimisation discrète"
-    }
-}

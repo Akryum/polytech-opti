@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8"/>
+        <title>Projet Optimisation</title>
+        <link rel="stylesheet/less" href="css/style.less"/>
+
+        <script>
+            less = {
+                env: "development",
+                poll: 1000
+            };
+        </script>
+        <script src="js/lib/less.min.js"></script>
+        <script>
+            less.watch();
+        </script>
+        <script src="js/lib/socket.io.js"></script>
+        <script src="js/lib/angular.js"></script>
+        <script src="js/app.js"></script>
+    </head>
+    <body ng-app="app" ng-controller="OptimizationCtrl as Opti">
+        
+        <div class="disconnected" ng-hide="Opti.netStatus.connected">Déconnecté</div>
+        
+        <section class="settings">
+            
+            <div class="h-box">
+                <div class="pane">
+                    <label>
+                        <span>Fichier de configuration</span>
+                        <div class="files">
+                            <div ng-repeat="file in Opti.files" ng-click="Opti.file = file" ng-class="{selected: Opti.file == file}" class="file"><a>{{file}}</a></div>
+                        </div>
+                    </label>
+                </div>
+                <div class="pane">
+                    <label><span>Population</span><input ng-model="Opti.population"/></label>
+                    <label><span>Générations</span><input ng-model="Opti.generations"/></label>
+                    <label><span>Sélection (ratio)</span><input ng-model="Opti.selection"/></label>
+                    <label><input type="checkbox" ng-model="Opti.randomSelection"/> Sélection aléatoire</label>
+                    <label><span>Mutation (chance)</span><input ng-model="Opti.mutation"/></label>
+                    <label><span>Mutation (itération)</span><input ng-model="Opti.mutationCount"/></label>
+                </div>
+            </div>
+            
+            <button ng-click="Opti.launch()">Lancer</button>
+            
+        </section>
+        
+        <section class="processing">
+            
+            <div class="progress">Génération {{Opti.progress.current}} / {{Opti.progress.total}}</div>
+            
+            <div class="progress-bar">
+                <div class="bar" ng-style="{width:Opti.progress.current/Opti.progress.total*100+'%'}"></div>
+            </div>
+            
+        </section>
+        
+        <section class="result" ng-show="Opti.result">
+            
+            <div class="infos">Coût : {{Opti.result.cost}} Patterns : {{Opti.result.patterns.length}}</div>
+            
+            <div class="itemCounts">
+                <div class="header">
+                    <span class="id">Img</span>
+                    <span class="inPatterns">Nombre</span>
+                    <span class="count">Copies</span>
+                    <span class="min">Requis</span>
+                </div>
+                <div class="itemCount" ng-repeat="item in Opti.result.itemCount">
+                    <span class="id">{{item.id+1}}</span>
+                    <span class="inPatterns">{{item.inPatterns}}</span>
+                    <span class="count">{{item.count}}</span>
+                    <span class="min">{{item.min}}</span>
+                </div>
+            </div>
+            
+            <div class="patterns">
+                <div ng-repeat="pattern in Opti.result.patterns" class="pattern" ng-style="{width: pattern.width+'px', height: pattern.height+'px'}">
+                    <div class="count">{{pattern.count}}</div>
+                    <div ng-repeat="item in pattern.items" class="item type{{item.constraint.id}}" ng-style="{width: item.width+'px', height: item.height+'px', left:item.x+'px', top:item.y+'px'}"/>
+                    <div class="id">{{item.constraint.id+1}}</div>
+                </div>
+            </div>
+            
+        </section>
+        
+    </body>
+</html>
